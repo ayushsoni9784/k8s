@@ -1,0 +1,146 @@
+KUBERNETES------------------------
+
+Things to be taken care of while making a webapplication
+
+1 Downtime 
+2 Security 
+3 Upgrade 
+4 Portablity
+5 Migration 
+6 Auto Scaling 
+7 fast Deployment 
+
+Container Orchestration tools 
+1 Docker Swarn 
+2 Dokku
+3 Apache Mesos 
+4 Kubernetes 
+
+The world most popular one is kubernetes also known as K8S.
+
+The next genration container orchestration engine.
+
+K8S originally designed by google.
+It is written in Go language launched in 2014.
+Google donated CNCF now CNCF maintaining K8S.
+
+
+KUBERNETES Architecture 
+
+Kubernetes is only installed in linux and windows 2019 server.
+
+
+			  Minion 1
+master node ----------->  Minion 2
+			  Minion 3 
+
+to install k8s we need to install docker in ever machine (both master and minion).
+
+Why we need to install docker in every machine?
+
+As k8s is not for creating container but for the managing the container as the k8s is container orchestration tool.
+If not docker but any container tools can be installed like podman, cri-o etc.
+
+
+Entire K8S is a collection of so many products.
+
+			Minion 1
+Master --------->  
+node 			Minion 2 
+
+In master node the most important component is Kube-Api Server.
+
+The entire setup is an kubernetes cluster.
+
+To connect to k8s is through kube-api server.
+For example if i want to make container i doesn't have to go to minion instead i will connect to master through kube-api server and then master node will do eveything.
+
+Another component in k8s master node is Kube-Scheduler.
+
+So if as a developer i want to deploy my docker image in kubernetes cluster the request will be recieved by kube-api server but the deployement will never be in the master node so in which minion the deployment will be done is decided by the Kube-schedular.
+
+Now how kube-schedular will decide that minion is healthy or having enough resourses to deploy an application in the minion that is taken care by node-controller.
+Node-controller is the one who checks the minion is healthy or not or adding the new minion or removing the minion or having enough resoures.
+
+Another component is Replication controller 
+Now replication controller is something in k8s master thatb will make sure no of container availablity in worker node.
+For example if we have decided that image will have two container at the begining then the request bwill receive by the kube-api server and then kube-schedular will deploy the container and it dployed the container in two diffrent minions lets say in minion 1 and 3 now if minion 3 failed or goes down  then container 2 will also be down now replication controller will connect with kube-schedular and it will plan the container 2 in the healthy minion so replication controller keep track of containers so automaticaly the conatiner will be made.
+
+
+So by combining all the component at master node it is called control plane component.
+
+Control plane components
+1 Kube-API Server
+2 Kube-scheduler
+3 Node Component 
+4 Replication controller 
+
+TO remember the status of k8s cluster or app that eveything is going or runing in the cluster so for that there is an database.
+
+The Database name is etcd that is NoSql database which store the info as key:value and also etcd is running on the master node.
+The status of cluster or app will be stored in the etcd it is the most important component or brain of cluster it store the data presistent. 
+
+Why the etcd is not counted in the control plane?
+
+As etcd is optional if we dont want to put it under the master server we can deploy the etcd in diffrent server outside the master cluster then we can ask api-server to read and write the data to outside server.
+
+etcd will never connect to any component but all the component will come and connect to etcd.
+
+There is an service in k9s master is known as kubelet.
+Kubelet will maintain all the control plane components alone for k9s master and it can also connect to another kubelet its is like the deamon. 
+
+
+Now in k8s minions when we install the docker engine in every minion then there is also an instalation of the docker network or bridge i.e. docker0 so if there are multiple minion every minion will have the docker0 and the conatiners willhave same ip that will start from 172.17.0.1 and so on so k8s never use docker0. Now we will not use the docker0 bridge we will create a one virtual bridge that will connect with every docker engine(in every minion) and this single bridge will responsible for giving networking solution to every minion or worker node even master node is also connected to the same bridge.
+
+So now who will create the bridge for the k8s so there are open source networking solutions like flannel, calico, callium, wevnev, cisco aci so we can use any project for creation of bridge.
+We will use calico.
+
+
+Another component is Kube-proxy 
+
+If there are one k8s master and three minions and containers are deployed in the minion, and master and minion are connected through common network through calico
+** In some cases we can schedule the container in master node it is possible but by default it doesn't schedule the conatiner in master node but we can in some cases.
+
+So now c1 and c2 is in minion and c3 is in master node and now c3 can communicate with c1 and c1 can communicate with c2 and c2 cannot communicate with container c3. It doesn't matter the container are in master node or minion but the communication is taken care by kube-proxy which is component running everywhere.
+Kube-porxy will maintain the communication across the worker node. In every worker node the kubelet is running which will give the stats of node that the node is healthy or not.
+
+Installation of Kubernetes Cluster --------------
+
+1 Single node k8s cluster 
+
+one master and one minion 
+
+2 Multinode k8s 
+	-->Types of multinode 
+		-->one master and n minions
+		-->multi master and n minions 
+3 Kubernetes as a service 
+
+So many cloud providers like aws google, azure, oracle, vmware, alibaba etc 
+services for k8s in cloud
+for aws-eks
+for google-gks
+for azure-aks
+for oracle-oks 
+
+Single node k8s cluster 
+
+This is installed using the minikube for installing k8s using minikube there must be vmware, virtual box, hyperv must be available.
+
+Or if the vmware or hyperv or virtual box is not available then we can use docker also.
+
+In that it will create a container in which seprate os will be installed and in that conatiner the k8s will be installed with single master node and minion. 
+
+Steps are 
+1  curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+
+2  sudo mv minikube /usr/bin/
+
+3  sudo chmod +x /usr/bin/minikube 
+
+4  minikube start --driver=docker 
+or minikube start --driver=vmware 
+
+
+
+
