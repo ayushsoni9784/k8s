@@ -141,6 +141,126 @@ Steps are
 4  minikube start --driver=docker 
 or minikube start --driver=vmware 
 
+Now accessing the k8s cluster 
+
+We can connect the k8s cluster through Kube-api server.
+
+There are two ways of connecting the k8s cluster like docker i.e. through cli or webui.
+
+The cli is the kubectl i.e. is command line client that will connect to k8s master.
+
+As we are using minikube we have too install kubectl in localsystem where the minikube is installed.
+And kubectl can be accessed from terminal or cmd.
+
+Steps for installing the kubectl 
+
+1   curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+
+2   sudo  mv kubectl   /usr/bin/
+
+3   sudo chmod +x /usr/bin/kubectl
+
+4   kubectl version 
+
+To see how many nodes are there i.e. how many master and minions are there ---
+
+kubectl get nodes
+
+
+
+Multi Node Kubernetes Cluster------------
+
+
+How to connect to multinode cluster which have 1 mastyer and 3 minion.
+
+Server side which is AWS side the master and minions machine are on AWS.
+
+CLient side is the localsystem or any system 
+
+So first we have to download the minikube and kubectl as above mentioned.
+
+after that we have to downloasd the authentication file from the master node using master node public ip.
+
+wget http://public-ip/admin.conf
+
+in this file we have lot of details like username pass but in this file we have private ip so we have to replace that private ip with public ip.
+
+We dont have to do this everytime but it depends how we have made the cluster.
+
+now if do 
+kubectl get nodes --kubeconfig admin.conf 
+
+it will show 1 master and 3 minion 
+
+kubectl version --kubeconfig admin.conf
+
+** Every cluster have there own authentication file.
+if we dont give conf file then it will connect to local if the minicube is present.
+
+
+------------------------------------------------
+
+POD concept-----
+
+Now if we have a docker engine on a machine and we have created a docker image and there is an machine in which the kubernetes is setup then we will not use the k8s docker engine to make the containers intead we will use k8s or the kube-api server that will make the container.
+
+Also when we have docker image and from that image we make the something thatis not a conatiner i.e. is pod.
+
+Pod is similar to container and that pod is having that application running.
+
+We are having os then we are having Docker engine running and on top of that k8s is running and through kubectl we connect to k8s.
+Now k8s cannot create container it can manage and maintain it needs any run rime engine like docker or podman. When we want to deploy Docker image cluster k8s is connecting to docker and DE is createing a container. 
+Now Conatiner need ip add mac add and container need resourses. Now k8s is connecting to DE and saying do not asssign amything it will assign by k8s. Thats why we are calling it pod.
+
+Pod will having caontainer ip mac and many other resources.
+
+
+How to create Pod?
+
+Pod can be written in yaml or json language.
+
+Pod file have saome predefined parameters.
+
+If we are creating a pod in yml then structure is
+
+apiVesrion:
+kind:
+metadata:
+spec:
+
+
+Example aof pod file 
+
+apiVersion: v1
+kind: Pod     #here P is in caps 
+metadata:     #some info about pod 
+ name: ayushpod1    #this is the pod name like container name in docker
+spec: 
+ containers:  #about my docker image and container info
+  - name: ayushc1 #name of my container
+    image: nginx #image from docker hub 
+
+
+
+
+*** it always pull the image from the docker hub and not locally
+
+Now deploying the pod in k8s cluster.
+
+kubectl create -f ayushpod1.yml
+
+To check the status of pod 
+kubectl get pods
+
+to deploy the pod in multinode cluster 
+
+kubectl create -f ayushpod1.yml --kubeconfig path/to/configfile 
+
+To delete the pod 
+
+kubectl delete pods ayushpod1 
+
+   
 
 
 
